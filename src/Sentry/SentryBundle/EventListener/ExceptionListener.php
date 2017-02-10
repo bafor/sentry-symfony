@@ -90,10 +90,9 @@ class ExceptionListener
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-        foreach ($this->skipCapture as $className) {
-            if ($exception instanceof $className) {
-                return;
-            }
+
+        if ($this->shouldExceptionBeSkipped($exception)) {
+            return;
         }
 
         $this->client->captureException($exception);
@@ -106,6 +105,10 @@ class ExceptionListener
     {
         $command = $event->getCommand();
         $exception = $event->getException();
+        
+        if ($this->shouldExceptionBeSkipped($exception)) {
+            return;
+        }
 
         $data = array(
             'tags' => array(
@@ -117,6 +120,17 @@ class ExceptionListener
         $this->client->captureException($exception, $data);
     }
 
+     private function shouldExceptionBeSkipped(\Exception $exception)
+    {
+        foreach ($this->skipCapture as $className) {
+            if ($exception instanceof $className) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
     /**
      * @param UserInterface | object | string $user
      */
