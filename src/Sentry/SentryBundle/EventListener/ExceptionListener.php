@@ -109,6 +109,10 @@ class ExceptionListener
         if ($this->shouldExceptionBeSkipped($exception)) {
             return;
         }
+        
+        if(false !== strpos('Connection reset by peer', $exception->getMessage())) {
+            return ;
+        }
 
         $data = array(
             'tags' => array(
